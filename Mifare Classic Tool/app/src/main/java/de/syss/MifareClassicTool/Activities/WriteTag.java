@@ -588,19 +588,20 @@ public class WriteTag extends BasicActivity {
     }
 
     /**
-     * TODO Doc
-     * @param fromSector
-     * @param toSector
-     * @param requestCode
-     * @param btnText
+     * Start the {@link KeyMapCreator} with a predefined range range of sectors.
+     * @param fromSector Sector to start from.
+     * @param toSector Last sector of the key map.
+     * @param requestCode Result code handled in {@link #onActivityResult(int, int, Intent)}.
+     * @param buttonText Text for the button.
      */
-    private void createKeyMapForRange(int fromSector, int toSector, int requestCode, String btnText) {
+    private void createKeyMapForRange(int fromSector, int toSector, int requestCode,
+                                      String buttonText) {
         Intent intent = new Intent(this, KeyMapCreator.class);
         intent.putExtra(KeyMapCreator.EXTRA_KEYS_DIR, Common.getFile(Common.KEYS_DIR).getAbsolutePath());
         intent.putExtra(KeyMapCreator.EXTRA_SECTOR_CHOOSER, false);
         intent.putExtra(KeyMapCreator.EXTRA_SECTOR_CHOOSER_FROM, Math.min(fromSector, toSector));
         intent.putExtra(KeyMapCreator.EXTRA_SECTOR_CHOOSER_TO, Math.max(fromSector, toSector));
-        intent.putExtra(KeyMapCreator.EXTRA_BUTTON_TEXT, btnText);
+        intent.putExtra(KeyMapCreator.EXTRA_BUTTON_TEXT, buttonText);
         startActivityForResult(intent, requestCode);
     }
 
@@ -1338,8 +1339,10 @@ public class WriteTag extends BasicActivity {
     }
 
     /**
-     * TODO: Doc.
-     * @param view
+     * Validate all inputs for the Value Block transfer/restore option and show key map creator.
+     * @param view The View object that triggered the method
+     * (in this case the write Value Block with transfer/restore button).
+     * @see KeyMapCreator
      */
     public void onWriteValueBlockTransferRestore(View view) {
         // Validate staging.
@@ -1604,7 +1607,9 @@ public class WriteTag extends BasicActivity {
     }
 
     /**
-     * TODO: Doc.
+     * Use the key map to validate permissions for the Value Block transfer/restore operation
+     * and then perform the operation using
+     * {@link MCReader#valueTransferRestore(int, int, int, int, byte[], byte[], boolean, byte[], boolean)}.
      */
     private void runValueTransferRestore() {
         int stagingSector = Integer.parseInt(mVtrStageSector.getText().toString());

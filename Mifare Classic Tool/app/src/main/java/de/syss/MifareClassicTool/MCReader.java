@@ -812,13 +812,14 @@ public class MCReader {
     }
 
     /**
-     * TODO Doc.
-     * @param sector
-     * @param block
-     * @param key
-     * @param useAsKeyB
-     * @return permissions like
-     * {@link Common#getOperationRequirements(byte, byte, byte, Operation, boolean, boolean)}
+     * Check if the provided key for a given sector and block has the decrement/transfer/restore
+     * permission.
+     * @param sector Target sector.
+     * @param block Target block in sector.
+     * @param key Key to validate.
+     * @param useAsKeyB True if key should be used as key B during authentication.
+     * @return Decrement/transfer/restore permissions for the key according to
+     * {@link Common#getOperationRequirements(byte, byte, byte, Operation, boolean, boolean)}.
      */
     public int hasDecTransRestPermission(int sector, int block, byte[] key, boolean useAsKeyB) {
         // Check for sector trailer.
@@ -960,19 +961,18 @@ public class MCReader {
         byte[] keyStage, boolean useKeyBStage,
         byte[] keyDest,  boolean useKeyBDest) {
 
-
         try {
             if (!isConnected()) {
                 mMFC.connect();
             }
 
-            // block numbers validation
+            // Block numbers validation.
             int stageBlocks = mMFC.getBlockCountInSector(stageSector);
             int destBlocks  = mMFC.getBlockCountInSector(destSector);
             if (stageBlock < 0 || stageBlock >= stageBlocks) return 2;
             if (destBlock  < 0 || destBlock  >= destBlocks)  return 2;
 
-            // safety against writing to trailer and manufacturer block safety
+            // Safety against writing to trailer and manufacturer block safety.
             if (stageBlock == stageBlocks - 1 || (stageSector == 0 && stageBlock == 0)) return 1;
             if (destBlock  == destBlocks - 1  || (destSector  == 0 && destBlock  == 0)) return 1;
 
@@ -985,14 +985,14 @@ public class MCReader {
             if (!ok)
                 return -1;
 
-            // save original content, from this block
+            // Save original content, from the staging block.
             byte[] original = mMFC.readBlock(stageAbs);
 
 
-            // write the prepared value block in correct format
+            // Write the prepared value block in correct format.
             mMFC.writeBlock(stageAbs, valueBlock16);
 
-            // perform a RESTORE
+            // Perform a RESTORE on staging block.
             mMFC.restore(stageAbs);
 
             ok = useKeyBDest
@@ -1001,10 +1001,10 @@ public class MCReader {
             if (!ok)
                 return -1;
 
-            // perform a TRANSFER
+            // Perform a TRANSFER on the destination block.
             mMFC.transfer(destAbs);
 
-            // write the original content back
+            // Write the original content back to the staging block.
             if (stageSector != destSector) {
                 ok = useKeyBStage
                     ? mMFC.authenticateSectorWithKeyB(stageSector, keyStage)
